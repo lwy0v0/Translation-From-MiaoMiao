@@ -55,18 +55,46 @@ $$
 &emsp;&emsp;在我们的实验中，我们在 LJSpeech 语料库 [22] 上使用一个 NVIDIA Tesla V100 GPU 以 2205kHz 的频率训练 StyleMelGAN。我们使用[8]中描述的相同超参数和归一化来计算对数幅度梅尔频谱图。我们使用 Adam 优化器 [23] 对生成器进行 100k 步的预训练，学习率 $lr_g = 10^{-4}$，$\beta= \{0.5, 0.9\}$ 。在开始对抗训练时，我们设置 $lr_g = 5*10^{-5}$ 并使用 FB-RWDs 和 $lr_d = 2*10^{-4}$ 的 Adam 优化器，并且 $\beta$ 相同。FB-RWD 在每个训练步骤中多次重复随机窗口，以通过足够的梯度更新来支持模型。我们使用 32 的批次大小，批次中每个样本的段长度为 1 秒。训练持续约 $1.5M$ 步。
 ### 4.2. 评估
 &emsp;&emsp;我们对 StyleMelGAN 与在同一数据集上训练的其他神经声码器进行客观和主观评估。对于我们所有的评估，测试集由同一演讲者录制的未可见项目组成，并从 LibriVox 在线语料库中随机选择。
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
-&emsp;&emsp;
+&emsp;&emsp;传统的客观测量（如PESQ和POLQA）对于评估神经声码器生成的语音波形并不可靠[11]。取而代之的是，我们使用 [9] 中定义并在 [25] 中实现的条件 Fréchet 深度语音距离 （cFDSD）。表 1 显示 StyleMelGAN 优于其他对抗性和非对抗性声码器。
+
+![表1](./static/4.png)
+<center>
+
+*表1：不同神经声码器的cFDSD分数（越低越好）。*
+</center>
+
+&emsp;&emsp;对于复制合成，我们对一组 15 名专家听众进行了 MUSHRA 听力测试，其结果如图 4 所示。我们选择了[6,11]中的这种类型的测试，因为这样可以更精确地评估生成的语音。锚点是使用 Griffin-Lim 算法的 PyTorch 实现生成的，迭代次数为 32 次。StyleMelGAN 的性能明显优于其他声码器约 15 MUSHRA 点。结果还表明，如[11]中已经发现的那样，WaveGlow产生的输出质量与WaveNet相当，同时与Parallel WaveGAN（P.WaveGAN）相当。
+
+![图4](./static/5.png)
+<center>
+
+*图4：我们的MUSHRA专家听力测试结果。*
+</center>
+
+&emsp;&emsp;对于文本转语音，我们通过37名听众在受控环境中执行的P.800ACR[26]听力测试来评估音频输出的主观质量。使用[24]中的Transformer.v3模型生成测试集的mel频谱图。我们还添加了 Griffin-Liman chor 作为 MNRU [26] 的替代品，以校准判断量表。表 2 显示 StyleMelGAN 明显优于其他模型。
+
+![表2](./static/6.png)
+<center>
+
+*表2：P.800ACR听力测试结果。*
+</center>
+
+&emsp;&emsp;我们在表3中报告了计算复杂度，该表显示了实时因子（RTF）的生成速度和不同并行声码器模型的参数数量。StyleMelGAN 在质量和推理速度之间提供了明显的折衷。
+
+![表3](./static/7.png)
+<center>
+
+*表3：在CPU（Intel Core i7-6700 3.40GHz）和GPU（Nvidia Tesla V100GPU）上研究的各种型号上生成的参数数量和实时因素。*
+</center>
+
+## 5. 结论
+&emsp;&emsp;这项工作介绍了 StyleMelGAN，这是一种轻量级且高效的对抗性声码器，用于在 CPU 和 GPU 上比实时更快的高保真语音合成。该模型使用时间自适应归一化 （TADE） 在目标语音的梅尔频谱图上调节生成器的每一层。对于对抗性训练，生成器与滤波器组随机窗口鉴别器竞争，后者分析不同时间尺度和多个频率子频段的合成语音信号。客观评估和主观听力测试都表明，StyleMelGAN明显优于先前的对抗性和最大似然声码器，为神经波形生成提供了新的最先进的基线。未来可能的前景包括进一步降低复杂性，以支持在低功耗处理器上运行的应用程序。
+
+## 6. 致谢
+&emsp;&emsp;感谢Fraunhofer IIS的Christian Dittmar、Prachi Govalkar、Yigitcan Özer、Srikanth Korse、JanBüthe、Kishan Gupta和Markus Multrus的热忱支持和有用的建议。
+
+## 7. 参考资料
+&emsp;&emsp;。。。
 
 
 
